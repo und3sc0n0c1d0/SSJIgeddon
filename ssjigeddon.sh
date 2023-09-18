@@ -72,7 +72,7 @@ elif [[ $2 == "cmd" ]]; then
     fi
 
 elif [[ $2 == "" ]]; then
-	echo -e "\nUsage:\tbash ssjigeddon.sh [options] [resource]\n";
+	echo -e "\nUsage:\tbash ssjigeddon.sh TARGET [options] [resource]\n";
 	echo -e "Options:";
 	echo -e "      check      Check if the host is vulnerable to this security flaw.";
 	echo -e "                 Validation via payload: <<res.end('text')>>.";
