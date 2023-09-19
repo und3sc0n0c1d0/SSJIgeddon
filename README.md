@@ -15,3 +15,6 @@ nodejs main.js
 Once you have it, from the browser you will see it like this:
 
 ![imagen](https://github.com/und3sc0n0c1d0/SSJIgeddon/assets/32236059/99b631a5-1746-4ed5-8e38-3603506ae647)
+
+## Demo
+[![asciicast](https://asciinema.org/a/RuLOF4skBQVsO6b5i7XJHjq8s.svg)](https://asciinema.org/a/RuLOF4skBQVsO6b5i7XJHjq8s)
